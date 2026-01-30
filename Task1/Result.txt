@@ -1,0 +1,25 @@
+# Task 1 Analysis Results
+=========================
+
+## 1. Parameters
+Mass (M): 10^8 tons
+AHP Preference parameter (a): 5 (Time is dominant)
+Calculated Weights -> Cost: 0.1667, Time: 0.8333
+
+## 2. Raw Metrics
+Scenario A:
+  - Cost: $1,675,977,653,631.28 USD (1.68 Trillion)
+  - Time: 186.22 Years
+Scenario B:
+  - Cost: $156,352,941,176,470.59 USD (156.35 Trillion)
+  - Time: 4357.30 Years
+Scenario C:
+  - Cost: $8,015,537,101,526.92 USD (8.02 Trillion)
+  - Time: 178.59 Years
+
+## 3. TOPSIS Ranking
+Rank   | Scenario   | Score     
+-----------------------------------
+1      | A          | 0.9982
+2      | C          | 0.9918
+3      | B          | 0.0000
