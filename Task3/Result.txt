@@ -1,0 +1,72 @@
+================================================================================
+TASK 3: WATER RESOURCE TRANSPORT ANALYSIS - STATISTICAL SUMMARY
+================================================================================
+
+1. WATER DEMAND CALCULATION
+--------------------------------------------------------------------------------
+   Daily Living Water:       1.825 million tons/year
+   Production Water:         1.278 million tons/year
+   Emergency Reserve:        0.150 million tons
+   Recycling Rate:           95.0%
+   Net Daily Transport:      1.55125 × 10^5 tons/year
+   Net Emergency Transport:  1.50 × 10^5 tons
+   TOTAL TRANSPORT REQUIRED: 3.05125 × 10^5 tons
+
+2. SCENARIO COMPARISON (Monte Carlo Results, N=10,000)
+--------------------------------------------------------------------------------
+
+   Scenario A (Elevator):
+      Cost (Billion USD):
+         Mean:      28.29
+         Median:    28.29
+         Std Dev:   2.51
+         CV:        0.0887
+         90% CI:    [24.16, 32.41]
+      Time (Years):
+         Mean:      0.581
+         Median:    0.581
+         Std Dev:   0.050
+         CV:        0.0862
+         90% CI:    [0.500, 0.663]
+
+   Scenario B (Rocket):
+      Cost (Billion USD):
+         Mean:      45.74
+         Median:    45.77
+         Std Dev:   5.16
+         CV:        0.1127
+         90% CI:    [37.39, 54.30]
+      Time (Years):
+         Mean:      0.250
+         Median:    0.250
+         Std Dev:   0.030
+         CV:        0.1206
+         90% CI:    [0.200, 0.299]
+
+   Scenario C (Hybrid):
+      Cost (Billion USD):
+         Mean:      32.51
+         Median:    32.52
+         Std Dev:   2.00
+         CV:        0.0615
+         90% CI:    [29.19, 35.82]
+      Time (Years):
+         Mean:      0.350
+         Median:    0.350
+         Std Dev:   0.025
+         CV:        0.0721
+         90% CI:    [0.308, 0.391]
+
+3. KEY FINDINGS
+--------------------------------------------------------------------------------
+   • Water Recycling Impact: 95% recycling rate reduces transport to 5% of total demand
+   • Optimal Scenario: Scenario C (Hybrid) offers best balance:
+       - Moderate cost (~32.5B USD)
+       - Balanced timeline (~0.35 years)
+       - Lowest variance (CV = 0.0615 for cost)
+   • Risk Analysis: Scenario B (Rocket) has highest cost variance (CV = 0.1135)
+   • Sensitivity: Mission duration most sensitive to rocket failure rate p_R1
+
+================================================================================
+END OF REPORT
+================================================================================
