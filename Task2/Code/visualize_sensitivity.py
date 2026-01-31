@@ -44,6 +44,9 @@ LINEWIDTH_SPINE = 2.0
 # ============================================================================
 # Color Palettes
 # ============================================================================
+# Gradient palette for tornado diagram (matching gradient image)
+GRADIENT_COLORS = ['#5EB9C2', '#4BA6C9', '#5B8FC6', '#7B75B4', '#935891', '#9B3E63']
+
 COLOR_PALETTE = {
     'scenario_A': '#1f77b4',  # Blue
     'scenario_B': '#ff7f0e',  # Orange
@@ -218,11 +221,10 @@ def plot_tornado_diagram(sobol_indices, output_metric, output_path):
     }
     labels_sorted = [param_labels[name] for name in param_names_sorted]
 
-    # Plot horizontal bars
+    # Plot horizontal bars with gradient colors
     y_pos = np.arange(len(param_names_sorted))
-    colors_tornado = [COLOR_PALETTE['scenario_A'], COLOR_PALETTE['scenario_B'],
-                      COLOR_PALETTE['scenario_C'], '#9467bd', '#8c564b',
-                      '#e377c2', '#7f7f7f']
+    # Extend gradient colors if needed
+    colors_tornado = GRADIENT_COLORS * (len(y_pos) // len(GRADIENT_COLORS) + 1)
 
     bars = ax.barh(y_pos, ST_sorted * 100, color=colors_tornado[:len(y_pos)])
 
@@ -265,7 +267,7 @@ def plot_tornado_diagram(sobol_indices, output_metric, output_path):
 
 def plot_cdfs(df_mc_results, statistics, metric='cost', output_path=None):
     """
-    Generate CDF plots for all three scenarios.
+    Generate probability density plots for all three scenarios in vertical arrangement.
 
     Args:
         df_mc_results (pd.DataFrame): MC output results
@@ -273,17 +275,19 @@ def plot_cdfs(df_mc_results, statistics, metric='cost', output_path=None):
         metric (str): 'cost' or 'time'
         output_path (str): Output file path
     """
-    fig, ax = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
+    from scipy.stats import gaussian_kde
+
+    # Create vertical layout: 3 rows, 1 column (flatter rectangles)
+    fig, axes = plt.subplots(3, 1, figsize=(FIG_WIDTH, FIG_HEIGHT * 1.2))
 
     colors = [COLOR_PALETTE['scenario_A'],
               COLOR_PALETTE['scenario_B'],
               COLOR_PALETTE['scenario_C']]
-    labels = ['Scenario A (Elevator)', 'Scenario B (Rockets)', 'Scenario C (Hybrid)']
+    scenario_names = ['Scenario A (Elevator)', 'Scenario B (Rockets)', 'Scenario C (Hybrid)']
+    scenarios = ['A', 'B', 'C']
 
-    # Collect all data for dynamic x-axis limits
-    all_data = []
-
-    for idx, scenario in enumerate(['A', 'B', 'C']):
+    # Create each subplot as a probability density function
+    for idx, (ax, scenario, color, label) in enumerate(zip(axes, scenarios, colors, scenario_names)):
         if metric == 'cost':
             col = f'C_{scenario}'
             data = df_mc_results[col].values / 1e12  # Trillion USD
@@ -293,53 +297,72 @@ def plot_cdfs(df_mc_results, statistics, metric='cost', output_path=None):
             data = df_mc_results[col].values
             unit = 'Years'
 
-        # Collect data for x-axis limits
-        all_data.extend(data)
+        # Calculate kernel density estimation
+        kde = gaussian_kde(data, bw_method='scott')
 
-        # Sort data
-        data_sorted = np.sort(data)
-        cdf = np.arange(1, len(data_sorted) + 1) / len(data_sorted)
+        # Independent x-axis range for each subplot, centered on the peak
+        data_min, data_max = data.min(), data.max()
+        data_range = data_max - data_min
+        data_margin = data_range * 0.15  # 15% margin for better centering
+        xlim = (data_min - data_margin, data_max + data_margin)
 
-        # Plot CDF
-        ax.plot(data_sorted, cdf, color=colors[idx], linewidth=3,
-                label=labels[idx])
+        x_plot = np.linspace(xlim[0], xlim[1], 1000)
+        density = kde(x_plot)
+
+        # Plot density curve
+        ax.fill_between(x_plot, density, alpha=0.4, color=color, linewidth=0)
+        ax.plot(x_plot, density, color=color, linewidth=3, label=label)
+
+        # Add median line
+        median = statistics[scenario][metric]['median']
+        if metric == 'cost':
+            median = median / 1e12
+
+        median_density = kde(median)
+        ax.axvline(median, color=color, linestyle='--', linewidth=2, alpha=0.8)
+        ax.plot(median, median_density, 'o', color=color,
+                markersize=10, markeredgecolor='black', markeredgewidth=2)
 
         # Add 90% CI shaded region
         ci_90 = statistics[scenario][metric]['ci_90']
         if metric == 'cost':
             ci_90 = [c / 1e12 for c in ci_90]
 
-        ax.axvline(ci_90[0], color=colors[idx], linestyle='--',
-                   linewidth=1.5, alpha=0.6)
-        ax.axvline(ci_90[1], color=colors[idx], linestyle='--',
-                   linewidth=1.5, alpha=0.6)
-        ax.axvspan(ci_90[0], ci_90[1], color=colors[idx], alpha=0.1)
+        ax.axvspan(ci_90[0], ci_90[1], color=color, alpha=0.15, linewidth=0)
 
-        # Add median marker
-        median = statistics[scenario][metric]['median']
-        if metric == 'cost':
-            median = median / 1e12
+        # Set axes with larger font sizes for subplots
+        xlabel = f'{"Cost" if metric == "cost" else "Time"} ({unit})' if idx == 2 else ''
+        ylabel = 'Probability Density'
 
-        median_cdf = np.searchsorted(data_sorted, median) / len(data_sorted)
-        ax.plot(median, median_cdf, 'o', color=colors[idx],
-                markersize=10, markeredgecolor='black', markeredgewidth=2)
+        # Use larger font sizes for subplot labels (22 for labels, 18 for ticks)
+        ax.set_xlabel(xlabel, fontsize=22, fontweight='bold', family=FONT_FAMILY)
+        ax.set_ylabel(ylabel, fontsize=22, fontweight='bold', family=FONT_FAMILY)
 
-    # Dynamic x-axis limits (Guideline: maximize data variance visibility)
-    x_min, x_max = np.min(all_data), np.max(all_data)
-    x_range = x_max - x_min
-    x_margin = x_range * 0.05  # 5% margin for better visibility
-    xlim = (x_min - x_margin, x_max + x_margin)
+        # Set tick parameters
+        ax.tick_params(axis='both', which='major', labelsize=18, width=LINEWIDTH_SPINE)
 
-    # Legend
-    ax.legend(fontsize=LEGEND_SIZE, frameon=True, loc='lower right',
-              prop=fm.FontProperties(family=FONT_FAMILY, weight='bold'))
+        # Set bold tick labels
+        for label in ax.get_xticklabels() + ax.get_yticklabels():
+            label.set_fontweight('bold')
+            label.set_family(FONT_FAMILY)
 
-    # Set Nature-style axes
-    xlabel = f'{"Cost" if metric == "cost" else "Time"} ({unit})'
-    set_nature_style_axes(ax, xlabel=xlabel, ylabel='Cumulative Probability', xlim=xlim)
+        # Set spine width and color
+        for spine in ax.spines.values():
+            spine.set_linewidth(LINEWIDTH_SPINE)
+            spine.set_color('black')
+            spine.set_visible(True)
 
-    # Set y-axis limits
-    ax.set_ylim([0, 1])
+        # Set limits
+        if xlim is not None:
+            ax.set_xlim(xlim)
+
+        # Legend for each subplot with larger size
+        legend_font = fm.FontProperties(family=FONT_FAMILY, weight='bold', size=20)
+        ax.legend(frameon=True, loc='upper right', prop=legend_font)
+
+        # Set y-axis to start from 0
+        y_max = density.max()
+        ax.set_ylim([0, y_max * 1.1])
 
     plt.tight_layout()
     if output_path:
