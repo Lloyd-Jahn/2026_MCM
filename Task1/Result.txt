@@ -1,38 +1,80 @@
-# Task 1 Analysis Results (Final Model)
-=======================================
+# Task 1 Analysis Results
+======================================================================
+Model: Cost-Timeline Optimization with 0-1 Programming
+======================================================================
 
 ## 1. Key Assumptions
-1. **Payload Capacity**: Strictly Fixed at 150 tons per launch (Constant).
-2. **Launch Frequency**: Increasing linearly. Each of the 10 sites adds 1 launch per year.
-3. **Base Capacity**: 2050 baseline = Historical Average + 20 launches/year.
-4. **Apex Logistics**: Includes transfer cost ($100/kg) from Apex Anchor to Moon surface.
-5. **Preference**: AHP Parameter a=5 (Time weight: 0.8333, Cost weight: 0.1667)
+----------------------------------------------------------------------
+1. **Payload Capacity**: Fixed at 150 tons per launch (constant)
+2. **Launch Frequency**: Increases by 1 launch/year per base
+3. **Capacity Constraint**: Maximum 200 launches/year per base
+4. **Base Capacity (2050)**: Historical average + 20 launches/year
+5. **Cost Parameters**:
+   - Elevator (Apex->Moon transfer): $92,700/ton ($92.7/kg)
+   - Rocket (Direct launch): $1,500,000/ton ($1,500/kg)
+6. **AHP Preference**: a=5 (Time weight: 0.8333, Cost weight: 0.1667)
+7. **Optimization**: Normalized weighted objective for base selection
 
 ## 2. Calculated Metrics
-Scenario A (Scenario A):
-  - Total Cost: $26,675,977,653,631.29 (26.68 Trillion)
-  - Completion Time: 186.22 Years (Finish: 2236.2)
+----------------------------------------------------------------------
+
+### Scenario A: Space Elevator Only
+  - Total Cost: $10,945,977,653,631 (10.95 Trillion USD)
+  - Completion Time: 186.22 years (Complete by: 2236)
   - Initial Annual Capacity: 537,000 tons/year
+  - Growth Model: Linear (constant capacity)
 
-Scenario B (Scenario B):
-  - Total Cost: $50,511,245,048,570.50 (50.51 Trillion)
-  - Completion Time: 350.65 Years (Finish: 2400.6)
-  - Initial Annual Capacity: 22,950 tons/year
-  - Growth Model: Quadratic (Driven by frequency increase only)
+### Scenario B: Rockets Only (Optimized)
+  - Total Cost: $150,572,654,407,500 (150.57 Trillion USD)
+  - Completion Time: 392.77 years (Complete by: 2443)
+  - Initial Annual Capacity: 52,950 tons/year
+  - Selected Bases (10):
+    • Florida
+    • California
+    • Taiyuan (China)
+    • Mahia (NZ)
+    • Kazakhstan
+    • French Guiana
+    • India
+    • Virginia
+    • Texas
+    • Alaska
+  - Growth Model: Piecewise (quadratic -> mixed -> linear)
 
-Scenario C (Scenario C):
-  - Total Cost: $31,550,492,498,605.41 (31.55 Trillion)
-  - Completion Time: 149.04 Years (Finish: 2199.0)
-  - Initial Annual Capacity: 559,950 tons/year
-  - Growth Model: Quadratic (Driven by frequency increase only)
+### Scenario C: Hybrid (Synchronized)
+  - Total Cost: $43,592,310,309,921 (43.59 Trillion USD)
+  - Completion Time: 142.78 years (Complete by: 2193)
+  - Initial Annual Capacity: 589,950 tons/year
+  - Elevator Contribution: 0.77×10^8 tons
+  - Rocket Contribution: 0.23×10^8 tons
+  - Growth Model: Hybrid (elevator constant + rocket piecewise)
+
 
 ## 3. TOPSIS Ranking Results
-Rank   | Scenario   | Score      | Norm Cost    | Norm Time   
-------------------------------------------------------------
-1      | C          | 0.9698     | 0.4835       | 0.3514
-2      | A          | 0.8182     | 0.4088       | 0.4391
-3      | B          | 0.0000     | 0.7740       | 0.8268
+----------------------------------------------------------------------
+Rank   | Scenario             | Score      | Norm Cost    | Norm Time   
+----------------------------------------------------------------------
+1      | Hybrid (Synchronized) | 0.931281 | 0.277415   | 0.312068
+2      | Space Elevator Only  | 0.836329 | 0.069659   | 0.407015
+3      | Rockets Only (Optimized) | 0.000000 | 0.958222   | 0.858459
+
 
 ## 4. Conclusion
-The optimal strategy is **Scenario C**.
-The synchronized Hybrid model offers the best balance of speed and feasibility.
+----------------------------------------------------------------------
+**Optimal Strategy: Scenario C (Hybrid (Synchronized))**
+
+Rationale: Hybrid strategy delivers:
+  • Balanced cost-time trade-off
+  • Risk diversification across two systems
+  • Faster completion than elevator-only
+  • Lower cost than rockets-only
+
+
+## 5. Model Validation
+----------------------------------------------------------------------
+✓ Physical constraints satisfied (200 launches/year cap)
+✓ 0-1 programming optimized base selection
+✓ Piecewise growth model verified
+✓ Cost-time trade-offs properly normalized
+✓ TOPSIS ranking reflects AHP preferences
+

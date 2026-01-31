@@ -110,13 +110,6 @@ def plot_cumulative_mass_timeline(metrics, output_dir):
     # 添加 y = 1.0 × 10^8 水平指示线
     ax.axhline(y=target_y, color='gray', linestyle='--', linewidth=2.5, 
                alpha=0.7)
-    
-    # 为指示线添加标签
-    ax.text(end_year, target_y * 1.02, 
-            fontsize=16, weight='bold', color='gray',
-            ha='right', va='bottom', backgroundcolor='white',
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
-                     edgecolor='lightgray', alpha=0.9))
 
     ax.set_xlabel("Year", weight="bold")
     ax.set_ylabel("Cumulative Mass Delivered/ 10$^8$ tons", weight="bold")
