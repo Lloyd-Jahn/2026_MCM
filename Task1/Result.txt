@@ -1,25 +1,38 @@
-# Task 1 Analysis Results
-=========================
+# Task 1 Analysis Results (Final Model)
+=======================================
 
-## 1. Parameters
-Mass (M): 10^8 tons
-AHP Preference parameter (a): 5 (Time is dominant)
-Calculated Weights -> Cost: 0.1667, Time: 0.8333
+## 1. Key Assumptions
+1. **Payload Capacity**: Strictly Fixed at 150 tons per launch (Constant).
+2. **Launch Frequency**: Increasing linearly. Each of the 10 sites adds 1 launch per year.
+3. **Base Capacity**: 2050 baseline = Historical Average + 20 launches/year.
+4. **Apex Logistics**: Includes transfer cost ($100/kg) from Apex Anchor to Moon surface.
+5. **Preference**: AHP Parameter a=5 (Time weight: 0.8333, Cost weight: 0.1667)
 
-## 2. Raw Metrics
-Scenario A:
-  - Cost: $1,675,977,653,631.28 USD (1.68 Trillion)
-  - Time: 186.22 Years
-Scenario B:
-  - Cost: $156,352,941,176,470.59 USD (156.35 Trillion)
-  - Time: 4357.30 Years
-Scenario C:
-  - Cost: $8,015,537,101,526.92 USD (8.02 Trillion)
-  - Time: 178.59 Years
+## 2. Calculated Metrics
+Scenario A (Scenario A):
+  - Total Cost: $26,675,977,653,631.29 (26.68 Trillion)
+  - Completion Time: 186.22 Years (Finish: 2236.2)
+  - Initial Annual Capacity: 537,000 tons/year
 
-## 3. TOPSIS Ranking
-Rank   | Scenario   | Score     
------------------------------------
-1      | A          | 0.9982
-2      | C          | 0.9918
-3      | B          | 0.0000
+Scenario B (Scenario B):
+  - Total Cost: $50,511,245,048,570.50 (50.51 Trillion)
+  - Completion Time: 350.65 Years (Finish: 2400.6)
+  - Initial Annual Capacity: 22,950 tons/year
+  - Growth Model: Quadratic (Driven by frequency increase only)
+
+Scenario C (Scenario C):
+  - Total Cost: $31,550,492,498,605.41 (31.55 Trillion)
+  - Completion Time: 149.04 Years (Finish: 2199.0)
+  - Initial Annual Capacity: 559,950 tons/year
+  - Growth Model: Quadratic (Driven by frequency increase only)
+
+## 3. TOPSIS Ranking Results
+Rank   | Scenario   | Score      | Norm Cost    | Norm Time   
+------------------------------------------------------------
+1      | C          | 0.9698     | 0.4835       | 0.3514
+2      | A          | 0.8182     | 0.4088       | 0.4391
+3      | B          | 0.0000     | 0.7740       | 0.8268
+
+## 4. Conclusion
+The optimal strategy is **Scenario C**.
+The synchronized Hybrid model offers the best balance of speed and feasibility.
