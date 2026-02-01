@@ -1,0 +1,181 @@
+================================================================================
+Task 4: Multi-Objective Optimization Results
+Moon Colony Transportation System Analysis
+================================================================================
+
+AHP WEIGHT CONFIGURATION
+--------------------------------------------------------------------------------
+Main Objective Weights:
+  Cost (w1):          0.2190 (21.90%)
+  Time (w2):          0.1012 (10.12%)
+  Reliability (w3):   0.0508 (5.08%)
+  Environment (w4):   0.6290 (62.90%)
+
+Environmental Sub-Weights:
+  PM2.5 (w_PM2.5):    0.1792 (17.92%)
+  CO2 (w_CO2):        0.6608 (66.08%)
+  Ecology (w_eco):    0.1087 (10.87%)
+  Resource (w_reso):  0.0513 (5.13%)
+
+================================================================================
+SCENARIO A: PURE SPACE ELEVATOR SYSTEM
+================================================================================
+
+Optimal Decision Variables:
+--------------------------------------------------------------------------------
+  Renewable energy ratio (s_E_elec): 1.0000 (100.00%)
+  Maintenance frequency (m_E):       2 times/harbour/year
+
+Objective Values:
+--------------------------------------------------------------------------------
+  Total Cost:           $11.01 trillion USD
+                        ($1.10e+13 USD)
+  Transport Time:       190.42 years
+                        (69502 days)
+  System Reliability:   0.999449
+                        (99.9449%)
+  Environmental Impact: 0.015436
+                        (normalized index, 0-1 scale)
+
+Normalized Objectives (0-1 scale):
+--------------------------------------------------------------------------------
+  F1 (Cost):          0.073398
+  F2 (Time):          0.544044
+  F3 (Unreliability): 0.000551
+  F4 (Environment):   0.015436
+
+Comprehensive Performance:
+--------------------------------------------------------------------------------
+  Weighted Score: 0.080869
+  Formula: F = 0.2190*F1 + 0.1012*F2 + 0.0508*F3 + 0.6290*F4
+
+================================================================================
+SCENARIO B: PURE ROCKET SYSTEM
+================================================================================
+
+Optimal Decision Variables:
+--------------------------------------------------------------------------------
+  Number of launch sites selected:   10
+  Selected sites:
+    - French Guiana
+    - Florida (USA)
+    - Satish Dhawan (India)
+    - Mahia (New Zealand)
+    - Texas (USA)
+    - Alaska (USA)
+    - California (USA)
+    - Virginia (USA)
+    - Kazakhstan
+    - Taiyuan (China)
+
+Objective Values:
+--------------------------------------------------------------------------------
+  Total Cost:           $163.35 trillion USD
+                        ($1.63e+14 USD)
+  Transport Time:       2299.55 years
+                        (839337 days)
+  System Reliability:   0.998625
+                        (99.8625%)
+  Environmental Impact: 1.027175
+                        (normalized index, 0-1 scale)
+
+Normalized Objectives (0-1 scale):
+--------------------------------------------------------------------------------
+  F1 (Cost):          1.088982
+  F2 (Time):          6.570156
+  F3 (Unreliability): 0.001375
+  F4 (Environment):   1.027175
+
+Comprehensive Performance:
+--------------------------------------------------------------------------------
+  Weighted Score: 1.549550
+  Formula: F = 0.2190*F1 + 0.1012*F2 + 0.0508*F3 + 0.6290*F4
+
+================================================================================
+SCENARIO C: HYBRID SYSTEM (ELEVATOR + ROCKET)
+================================================================================
+
+Optimal Decision Variables:
+--------------------------------------------------------------------------------
+  Elevator mass fraction (alpha):     0.9232 (92.32%)
+  Rocket mass fraction (1-alpha):     0.0768 (7.68%)
+  Renewable energy ratio (s_E_elec): 1.0000 (100.00%)
+  Maintenance frequency (m_E):       2 times/harbour/year
+  Number of launch sites:            10
+
+Objective Values:
+--------------------------------------------------------------------------------
+  Total Cost:           $22.71 trillion USD
+                        ($2.27e+13 USD)
+  Transport Time:       175.50 years
+                        (64059 days)
+  System Reliability:   0.999386
+                        (99.9386%)
+  Environmental Impact: 0.093128
+                        (normalized index, 0-1 scale)
+
+Normalized Objectives (0-1 scale):
+--------------------------------------------------------------------------------
+  F1 (Cost):          0.151375
+  F2 (Time):          0.501437
+  F3 (Unreliability): 0.000614
+  F4 (Environment):   0.093128
+
+Comprehensive Performance:
+--------------------------------------------------------------------------------
+  Weighted Score: 0.142505
+  Formula: F = 0.2190*F1 + 0.1012*F2 + 0.0508*F3 + 0.6290*F4
+
+================================================================================
+COMPARATIVE ANALYSIS
+================================================================================
+
+Ranking by Comprehensive Score (lower is better):
+--------------------------------------------------------------------------------
+  1. Scenario A (Elevator): 0.080869
+  2. Scenario C (Hybrid): 0.142505
+  3. Scenario B (Rocket): 1.549550
+
+RECOMMENDED SOLUTION:
+--------------------------------------------------------------------------------
+  Optimal Scenario: A (Elevator)
+  Comprehensive Score: 0.080869
+
+Key Advantages:
+  - Lowest environmental impact (near-zero emissions)
+  - Highest long-term cost efficiency
+  - Sustainable operation with renewable energy
+  - No atmospheric pollution
+
+Environmental Impact Comparison:
+--------------------------------------------------------------------------------
+  Scenario A: 0.015436 (baseline)
+  Scenario B: 1.027175 (66.55x higher than A)
+  Scenario C: 0.093128 (6.03x higher than A)
+
+  Environmental Impact Reduction (B->C): 90.93%
+  Environmental Impact Reduction (B->A): 98.50%
+
+Cost-Time Tradeoff Analysis:
+--------------------------------------------------------------------------------
+  Scenario A: $11.01 trillion USD, 190.42 years
+  Scenario B: $163.35 trillion USD, 2299.55 years
+  Scenario C: $22.71 trillion USD, 175.50 years
+
+  Cost savings (A vs B): $152.33 trillion USD (93.26%)
+  Time savings (B vs A): -2109.14 years (-1107.65%)
+
+================================================================================
+VISUALIZATION OUTPUTS
+================================================================================
+
+Generated figures:
+  1. fig1_ahp_weights.pdf - AHP weight comparison
+  2. fig2_multi_objective_radar.pdf - Multi-objective performance
+  3. fig3_environmental_heatmap.pdf - Environmental impact breakdown
+  4. fig4_pareto_cost_time.pdf - Cost-time Pareto frontier
+  5. fig5_comprehensive_scores.pdf - Comprehensive score comparison
+
+================================================================================
+END OF REPORT
+================================================================================
