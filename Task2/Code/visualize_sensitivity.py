@@ -4,7 +4,7 @@ visualize_sensitivity.py
 Purpose: Generate Nature-style publication-quality visualizations for sensitivity analysis.
 
 Key Features:
-- Plot 1: Cost distribution heatmap (2D marginal)
+- Plot 1: Dual 3D surface plots (top 3 sensitivity factors: p_R1, p_E1, beta_E1)
 - Plot 2: Tornado diagram (sensitivity ranking)
 - Plot 3: Cumulative distribution functions (CDFs)
 - Plot 4: 3D surface plot (time vs. dual-parameter variation)
@@ -21,6 +21,7 @@ User Adjustment Guide:
 - Line 46-52: Color palettes (Scenario colors and heatmap colors)
 - Line 57-59: Figure sizes (FIG_WIDTH, FIG_HEIGHT, DPI)
 - Line 66: Export format (FILE_FORMAT)
+- Line 183: Viewing angles for 3D plots (elev, azim)
 """
 
 import numpy as np
@@ -31,6 +32,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import griddata
 import matplotlib.font_manager as fm
 import os
+import matplotlib.tri as tri
 
 # ============================================================================
 # Typography Settings (Nature-style)
@@ -117,71 +119,100 @@ def set_nature_style_axes(ax, xlabel, ylabel, xlim=None, ylim=None):
 
 
 # ============================================================================
-# Plot 1: Cost Distribution Heatmap (2D Marginal)
+# Plot 1: Dual 3D Surface (Top 3 Sensitivity Factors)
 # ============================================================================
 
 def plot_cost_heatmap(df_mc_samples, df_mc_results, output_path):
     """
-    Generate 2D heatmap showing mean cost as function of p_R1 and p_E2.
-
-    Args:
-        df_mc_samples (pd.DataFrame): MC parameter samples
-        df_mc_results (pd.DataFrame): MC output results
-        output_path (str): Output file path
+    Nature-style Dual 3D Surface Plot using Polynomial Response Surface.
+    Isolates target variable interactions by holding other parameters at median baselines.
     """
-    fig, ax = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
-
-    # Extract parameters and cost
-    p_R1 = df_mc_samples['p_R1'].values
-    p_E2 = df_mc_samples['p_E2'].values
-    cost_C = df_mc_results['C_C'].values / 1e12  # Convert to trillion USD
-
-    # Create grid
-    grid_resolution = 50
-    p_R1_grid = np.linspace(p_R1.min(), p_R1.max(), grid_resolution)
-    p_E2_grid = np.linspace(p_E2.min(), p_E2.max(), grid_resolution)
-    P_R1_grid, P_E2_grid = np.meshgrid(p_R1_grid, p_E2_grid)
-
-    # Interpolate cost on grid
-    cost_grid = griddata((p_R1, p_E2), cost_C, (P_R1_grid, P_E2_grid), method='cubic')
-
-    # Plot heatmap
     from matplotlib.colors import LinearSegmentedColormap
+    from sklearn.preprocessing import PolynomialFeatures
+    from sklearn.linear_model import LinearRegression
+
+    # 1. Fit the Global Response Model
+    # We use all 7 parameters to capture the true underlying physics
+    X = df_mc_samples[['p_E1', 'beta_E1', 'p_R1', 'p_E2', 't_E2', 'p_R2', 't_R2']].values
+    y = df_mc_results['C_C'].values / 1e12  # Trillion USD
+    
+    # Degree 2 captures the primary interactions (e.g., p_E1 * p_R1) smoothly
+    poly = PolynomialFeatures(degree=2)
+    model = LinearRegression().fit(poly.fit_transform(X), y)
+
+    # Calculate neutral baselines (medians) for "zeroing out" other effects
+    baselines = df_mc_samples.median().values
+    grid_res = 50 
+
+    # Define Nature-style divergent colormap
     colors = [COLOR_PALETTE['heatmap_low'], 'white', COLOR_PALETTE['heatmap_high']]
-    n_bins = 100
-    cmap = LinearSegmentedColormap.from_list('custom', colors, N=n_bins)
+    cmap = LinearSegmentedColormap.from_list('nature_heat', colors, N=100)
 
-    im = ax.contourf(P_R1_grid * 100, P_E2_grid * 100, cost_grid,
-                     levels=30, cmap=cmap)
+    fig = plt.figure(figsize=(FIG_WIDTH * 2, FIG_HEIGHT))
 
-    # Colorbar
-    cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label('Mean Cost (Trillion USD)', fontsize=LABEL_SIZE,
-                   fontweight='bold', family=FONT_FAMILY)
-    cbar.ax.tick_params(labelsize=TICK_SIZE, width=LINEWIDTH_SPINE)
+    # ========================================================================
+    # Left Plot: Cost vs. p_E1 & p_R1 (Others held at baseline)
+    # ========================================================================
+    ax1 = fig.add_subplot(121, projection='3d')
+    p_E1_range = np.linspace(df_mc_samples['p_E1'].min(), df_mc_samples['p_E1'].max(), grid_res)
+    p_R1_range = np.linspace(df_mc_samples['p_R1'].min(), df_mc_samples['p_R1'].max(), grid_res)
+    P_E1, P_R1 = np.meshgrid(p_E1_range, p_R1_range)
+
+    # Create synthetic prediction matrix
+    X_pred1 = np.tile(baselines, (grid_res**2, 1))
+    X_pred1[:, 0] = P_E1.ravel() # p_E1 index
+    X_pred1[:, 2] = P_R1.ravel() # p_R1 index
+    Z1 = model.predict(poly.transform(X_pred1)).reshape(grid_res, grid_res)
+
+    surf1 = ax1.plot_surface(P_R1*100, P_E1*100, Z1, cmap=cmap, alpha=0.9, antialiased=True, linewidth=0)
+
+    # ========================================================================
+    # Right Plot: Cost vs. p_E1 & beta_E1 (Others held at baseline)
+    # ========================================================================
+    ax2 = fig.add_subplot(122, projection='3d')
+    beta_range = np.linspace(df_mc_samples['beta_E1'].min(), df_mc_samples['beta_E1'].max(), grid_res)
+    BETA, P_E1_2 = np.meshgrid(beta_range, p_E1_range)
+
+    X_pred2 = np.tile(baselines, (grid_res**2, 1))
+    X_pred2[:, 0] = P_E1_2.ravel() # p_E1 index
+    X_pred2[:, 1] = BETA.ravel() # beta_E1 index
+    Z2 = model.predict(poly.transform(X_pred2)).reshape(grid_res, grid_res)
+
+    surf2 = ax2.plot_surface(BETA*100, P_E1_2*100, Z2, cmap=cmap, alpha=0.9, antialiased=True, linewidth=0)
+
+    # Formatting (Nature Style)
+    for ax, xlab, ylab in zip([ax1, ax2], 
+                             [r'$\mathbf{p_{R1}}$ (Launch Fail, %)', r'$\mathbf{\beta_{E1}}$ (Capacity Loss, %)'], 
+                             [r'$\mathbf{p_{E1}}$ (Tether Sway, %)', r'$\mathbf{p_{E1}}$ (Tether Sway, %)']):
+        ax.set_xlabel(xlab, fontsize=LABEL_SIZE, fontweight='bold', family=FONT_FAMILY, labelpad=12)
+        ax.set_ylabel(ylab, fontsize=LABEL_SIZE, fontweight='bold', family=FONT_FAMILY, labelpad=12)
+        ax.set_zlabel('Mean Cost\n(Trillion USD)', fontsize=LABEL_SIZE, fontweight='bold', family=FONT_FAMILY, labelpad=15)
+        
+        # Set bold ticks
+        ax.tick_params(axis='both', which='major', labelsize=TICK_SIZE, width=LINEWIDTH_SPINE)
+        for label in ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels():
+            label.set_fontweight('bold')
+            label.set_family(FONT_FAMILY)
+        
+        ax.view_init(elev=25, azim=135)
+        ax.xaxis.pane.fill = ax.yaxis.pane.fill = ax.zaxis.pane.fill = False
+        ax.invert_yaxis()
+
+    # Shared Colorbar
+    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(surf2, cax=cbar_ax)
+    cbar.set_label('Mean Cost (Trillion USD)', fontsize=LABEL_SIZE, fontweight='bold', family=FONT_FAMILY)
     for label in cbar.ax.get_yticklabels():
         label.set_fontweight('bold')
         label.set_family(FONT_FAMILY)
 
-    # Set Nature-style axes
-    set_nature_style_axes(ax,
-                          xlabel='Rocket Launch Failure Rate (%)',
-                          ylabel='Elevator Breakdown Probability (%)')
-
-    plt.tight_layout()
-
-    # Debug: print absolute path
-    abs_path = os.path.abspath(output_path)
-    print(f"  Attempting to save to: {abs_path}")
-
-    try:
-        plt.savefig(output_path, format=FILE_FORMAT, dpi=DPI, bbox_inches='tight')
-        plt.close()
-        print(f"  ✓ Saved successfully")
-    except Exception as e:
-        print(f"  ✗ Error: {str(e)}")
-        plt.close()
-        raise
+    plt.subplots_adjust(left=0.05, right=0.90, wspace=0.3)
+    
+    # Save using absolute path
+    abs_output = os.path.abspath(output_path)
+    plt.savefig(abs_output, format=FILE_FORMAT, dpi=DPI, bbox_inches='tight')
+    plt.close()
+    print(f"✓ Isolated 3D Surface plots saved to: {abs_output}")
 
 
 # ============================================================================
@@ -475,9 +506,9 @@ def generate_all_plots(sensitivity_results, output_dir='./'):
     statistics = sensitivity_results['statistics']
     sobol_indices = sensitivity_results.get('sobol_indices', None)
 
-    # Plot 1: Cost heatmap
-    print("\n[1/4] Generating cost distribution heatmap...")
-    output_path = os.path.join(output_dir, f'fig1_cost_heatmap.{FILE_FORMAT}')
+    # Plot 1: Dual 3D surface plots (top 3 sensitivity factors)
+    print("\n[1/4] Generating dual 3D surface plots (top 3 factors: p_R1, p_E1, beta_E1)...")
+    output_path = os.path.join(output_dir, f'fig1_dual_3d_top3.{FILE_FORMAT}')
     plot_cost_heatmap(df_mc_samples, df_mc_results, output_path)
 
     # Plot 2: Tornado diagram (if Sobol indices available)

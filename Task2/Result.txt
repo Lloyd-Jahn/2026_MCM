@@ -1,7 +1,7 @@
 ======================================================================
 TASK 2: ROBUSTNESS ANALYSIS UNDER NON-PERFECT OPERATIONAL CONDITIONS
 ======================================================================
-Generated: 2026-01-31 20:50:02
+Generated: 2026-02-01 12:50:12
 Monte Carlo Samples: 1,000
 Sobol Analysis: Enabled
 
